@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#Calculates base commit.
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+        target=HEAD
+else
+	#Magic number
+        target=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+#Calculate number of changed lines.
+#Expected git output is something like this -> %d files changed, %d insertions(+), %d deletions(-)
+#Output may differ, I don't know all the details :)
+totallines=$(git diff $target --stat | grep -E "file(s)? changed" | awk '{sum=0; for(i=4;i<=NF;i+=2) sum+=$i; print sum;}')
+
+#Nothing's changed
+if [ "$totallines" == "" ];then
+        exit 0;
+fi
+
+#Modify this part.
+if (( $totallines > 200 )); then
+	echo "Too many lines to commit ($totallines). Use separate commits for this change."
+	exit 1;
+fi;
+
+exit 0;
